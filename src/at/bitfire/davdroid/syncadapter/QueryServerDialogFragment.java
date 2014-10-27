@@ -106,7 +106,8 @@ public class QueryServerDialogFragment extends DialogFragment implements LoaderC
 			);
 			
 			try {
-				DavResourceFinder.findResources(context, serverInfo);
+				DavResourceFinder finder = new DavResourceFinder(context);
+				finder.findResources(serverInfo);
 			} catch (URISyntaxException e) {
 				serverInfo.setErrorMessage(getContext().getString(R.string.exception_uri_syntax, e.getMessage()));
 			}  catch (IOException e) {

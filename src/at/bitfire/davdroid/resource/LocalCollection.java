@@ -18,6 +18,7 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.OperationApplicationException;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.provider.CalendarContract;
@@ -119,6 +120,8 @@ public abstract class LocalCollection<T extends Resource> {
 				fresh[idx] = id;
 			}
 			return fresh;
+		} catch(SQLiteException ex) {
+			throw new LocalStorageException(ex);
 		} catch(RemoteException ex) {
 			throw new LocalStorageException(ex);
 		}
@@ -146,6 +149,8 @@ public abstract class LocalCollection<T extends Resource> {
 			for (int idx = 0; cursor.moveToNext(); idx++)
 				updated[idx] = cursor.getLong(0);
 			return updated;
+		} catch(SQLiteException ex) {
+			throw new LocalStorageException(ex);
 		} catch(RemoteException ex) {
 			throw new LocalStorageException(ex);
 		}
@@ -173,6 +178,8 @@ public abstract class LocalCollection<T extends Resource> {
 			for (int idx = 0; cursor.moveToNext(); idx++)
 				deleted[idx] = cursor.getLong(0);
 			return deleted;
+		} catch(SQLiteException ex) {
+			throw new LocalStorageException(ex);
 		} catch(RemoteException ex) {
 			throw new LocalStorageException(ex);
 		}
@@ -198,6 +205,8 @@ public abstract class LocalCollection<T extends Resource> {
 				return resource;
 			} else
 				throw new RecordNotFoundException();
+		} catch(SQLiteException ex) {
+			throw new LocalStorageException(ex);
 		} catch(RemoteException ex) {
 			throw new LocalStorageException(ex);
 		}
@@ -224,6 +233,8 @@ public abstract class LocalCollection<T extends Resource> {
 				return resource;
 			} else
 				throw new RecordNotFoundException();
+		} catch(SQLiteException ex) {
+			throw new LocalStorageException(ex);
 		} catch(RemoteException ex) {
 			throw new LocalStorageException(ex);
 		}
@@ -290,6 +301,8 @@ public abstract class LocalCollection<T extends Resource> {
 		values.put(entryColumnETag(), eTag);
 		try {
 			providerClient.update(ContentUris.withAppendedId(entriesURI(), res.getLocalID()), values, null, new String[] {});
+		} catch(SQLiteException ex) {
+			throw new LocalStorageException(ex);
 		} catch (RemoteException e) {
 			throw new LocalStorageException(e);
 		}
@@ -310,6 +323,8 @@ public abstract class LocalCollection<T extends Resource> {
 				Log.d(TAG, "Committing " + pendingOperations.size() + " operations");
 				providerClient.applyBatch(pendingOperations);
 				pendingOperations.clear();
+			} catch(SQLiteException ex) {
+				throw new LocalStorageException(ex);
 			} catch (RemoteException ex) {
 				throw new LocalStorageException(ex);
 			} catch(OperationApplicationException ex) {

@@ -31,9 +31,8 @@ import at.bitfire.davdroid.resource.LocalCalendar;
 import at.bitfire.davdroid.resource.LocalStorageException;
 
 public class LocalCalendarTest extends InstrumentationTestCase {
-	
 	private static final String
-		TAG = "davroid.LocalCalendarTest",
+		TAG = "davdroid.LocalCalendarTest",
 		calendarName = "DAVdroid_Test";
 	
 	ContentProviderClient providerClient;
@@ -86,7 +85,6 @@ public class LocalCalendarTest extends InstrumentationTestCase {
 			// found local test calendar
 			id = cursor.getLong(0);
 			Log.d(TAG, "Found test calendar with ID " + id);
-			
 		} else {
 			// no local test calendar found, create 
 			ContentValues values = new ContentValues();

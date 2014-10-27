@@ -120,7 +120,7 @@ public abstract class DavSyncAdapter extends AbstractThreadedSyncAdapter impleme
 
 		// TODO use VCard 4.0 if possible
 		AccountSettings accountSettings = new AccountSettings(getContext(), account);
-		Log.d(TAG, "Server supports VCard version " + accountSettings.getAddressBookVCardVersion());
+		Log.d(TAG, "If CardDAV: server supports VCard version " + accountSettings.getAddressBookVCardVersion());
 
 		try {
 			// get local <-> remote collection pairs

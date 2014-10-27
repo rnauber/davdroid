@@ -25,7 +25,6 @@ import at.bitfire.davdroid.resource.RemoteCollection;
 
 public class ContactsSyncAdapterService extends Service {
 	private static ContactsSyncAdapter syncAdapter;
-
 	
 	@Override
 	public void onCreate() {

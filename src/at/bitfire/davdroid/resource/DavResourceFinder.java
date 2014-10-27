@@ -10,6 +10,9 @@ import ch.boye.httpclientandroidlib.HttpException;
 import ch.boye.httpclientandroidlib.impl.client.CloseableHttpClient;
 import ezvcard.VCardVersion;
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.util.Log;
 import at.bitfire.davdroid.R;
 import at.bitfire.davdroid.webdav.DavException;
@@ -22,8 +25,15 @@ import at.bitfire.davdroid.webdav.HttpPropfind.Mode;
 public class DavResourceFinder {
 	private final static String TAG = "davdroid.DavResourceFinder";
 	
+	protected Context context;
 	
-	public static void findResources(Context context, ServerInfo serverInfo) throws URISyntaxException, DavException, HttpException, IOException {
+	
+	public DavResourceFinder(Context context) {
+		this.context = context;
+	}
+	
+	
+	public void findResources(ServerInfo serverInfo) throws URISyntaxException, DavException, HttpException, IOException {
 		// disable compression and enable network logging for debugging purposes 
 		CloseableHttpClient httpClient = DavHttpClient.create(true, true);
 		
@@ -89,15 +99,6 @@ public class DavResourceFinder {
 						for (WebDavResource resource : homeSetCalendars.getMembers())
 							if (resource.isCalendar()) {
 								Log.i(TAG, "Found calendar: " + resource.getLocation().getRawPath());
-								if (resource.getSupportedComponents() != null) {
-									// CALDAV:supported-calendar-component-set available
-									boolean supportsEvents = false;
-									for (String supportedComponent : resource.getSupportedComponents())
-										if (supportedComponent.equalsIgnoreCase("VEVENT"))
-											supportsEvents = true;
-									if (!supportsEvents)	// ignore collections without VEVENT support
-										continue;
-								}
 								ServerInfo.ResourceInfo info = new ServerInfo.ResourceInfo(
 									ServerInfo.ResourceInfo.Type.CALENDAR,
 									resource.isReadOnly(),
@@ -105,6 +106,23 @@ public class DavResourceFinder {
 									resource.getDisplayName(),
 									resource.getDescription(), resource.getColor()
 								);
+								if (resource.getSupportedComponents() != null) {
+									// CALDAV:supported-calendar-component-set available
+									boolean supportsEvents = false,
+											supportsTasks = false;
+									for (String supportedComponent : resource.getSupportedComponents())
+										if (supportedComponent.equalsIgnoreCase("VEVENT"))
+											info.setForEvents(supportsEvents = true);
+										else if (supportedComponent.equalsIgnoreCase("VTODO"))
+											info.setForTasks(supportsTasks = true);
+									Log.i(TAG, "Calendar supports [events: " + supportsEvents + "], [tasks: " + supportsTasks + "]");
+									if (!supportsEvents && !(supportsTasks && taskProviderAvailable()))		// ignore collections without usable content
+										continue;
+								} else {
+									Log.w(TAG, "supported-calendar-component-set not available, assuming support for VEVENT and VTODO");
+									info.setForEvents(true);
+									info.setForTasks(true);
+								}
 								info.setTimezone(resource.getTimezone());
 								calendars.add(info);
 							}
@@ -171,6 +189,19 @@ public class DavResourceFinder {
 			// for instance, 405 Method not allowed
 		}
 		return false;
+	}
+	
+	
+	protected boolean taskProviderAvailable() {
+		PackageManager pm = context.getPackageManager();
+		PackageInfo mirakel;
+		try {
+			mirakel = pm.getPackageInfo("de.azapps.mirakelandroid", PackageManager.GET_PROVIDERS);
+		} catch (NameNotFoundException e) {
+			Log.d(TAG, "Mirakel content provider not found, no task support");
+			return false;
+		}
+		return mirakel != null && mirakel.versionCode > 18;
 	}
 	
 }

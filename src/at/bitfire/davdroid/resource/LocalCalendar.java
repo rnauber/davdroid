@@ -201,11 +201,13 @@ public class LocalCalendar extends LocalCollection<Event> {
 
 
 	/* create/update/delete */
-	
+
+	@Override
 	public Event newResource(long localID, String resourceName, String eTag) {
 		return new Event(localID, resourceName, eTag);
 	}
 	
+	@Override
 	public void deleteAllExceptRemoteNames(Resource[] remoteResources) {
 		String where;
 		
@@ -444,7 +446,7 @@ public class LocalCalendar extends LocalCollection<Event> {
 		Event event = (Event)resource;
 
 		builder = builder
-				.withValue(Events.CALENDAR_ID, id)
+				.withValue(entryColumnParentID(), id)
 				.withValue(entryColumnRemoteName(), event.getName())
 				.withValue(entryColumnETag(), event.getETag())
 				.withValue(entryColumnUID(), event.getUid())

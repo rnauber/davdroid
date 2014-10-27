@@ -133,7 +133,7 @@ public class Event extends Resource {
 			throw new InvalidResourceException(e);
 		}
 		
-		// event
+		// we're only interested in VEVENTs
 		ComponentList events = ical.getComponents(Component.VEVENT);
 		if (events == null || events.isEmpty())
 			throw new InvalidResourceException("No VEVENT found");

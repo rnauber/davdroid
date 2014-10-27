@@ -122,10 +122,12 @@ public class LocalAddressBook extends LocalCollection<Contact> {
 	
 	/* create/update/delete */
 	
+	@Override
 	public Contact newResource(long localID, String resourceName, String eTag) {
 		return new Contact(localID, resourceName, eTag);
 	}
 	
+	@Override
 	public void deleteAllExceptRemoteNames(Resource[] remoteResources) {
 		String where;
 		

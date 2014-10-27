@@ -56,8 +56,11 @@ public class ServerInfo implements Serializable {
 		final boolean readOnly;
 		final String URL, title, description, color;
 
+		// CardDAV-specific
 		VCardVersion vCardVersion;
-
+		
+		// CalDAV-specific
+		boolean forEvents, forTasks;
 		String timezone;
 	}
 }

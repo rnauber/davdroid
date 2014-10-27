@@ -13,7 +13,8 @@ public class DavResourceFinderTest extends InstrumentationTestCase {
 	
 	public void testFindResources() throws Exception {
 		ServerInfo info = new ServerInfo(Constants.ROBOHYDRA_BASE, "test", "test", true);
-		DavResourceFinder.findResources(getInstrumentation().getContext(), info);
+		DavResourceFinder finder = new DavResourceFinder(getInstrumentation().getContext());
+		finder.findResources(info);
 		
 		// CardDAV
 		assertTrue(info.isCardDAV());

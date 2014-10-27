@@ -125,6 +125,8 @@ public abstract class RemoteCollection<T extends Resource> {
 			member.get(Contact.MIME_TYPE);
 		else if (resource instanceof Event)
 			member.get(Event.MIME_TYPE);
+		else if (resource instanceof Task)
+			member.get(Task.MIME_TYPE);
 		else {
 			Log.wtf(TAG, "Should fetch something, but neither contact nor calendar");
 			throw new InvalidResourceException("Didn't now which MIME type to accept");

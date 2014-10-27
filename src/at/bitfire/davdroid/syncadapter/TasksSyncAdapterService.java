@@ -1,10 +1,3 @@
-/*******************************************************************************
- * Copyright (c) 2014 Ricki Hirner (bitfire web engineering).
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the GNU Public License v3.0
- * which accompanies this distribution, and is available at
- * http://www.gnu.org/licenses/gpl.html
- ******************************************************************************/
 package at.bitfire.davdroid.syncadapter;
 
 import java.net.URISyntaxException;
@@ -19,12 +12,12 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
-import at.bitfire.davdroid.resource.CalDavCalendar;
-import at.bitfire.davdroid.resource.LocalCalendar;
+import at.bitfire.davdroid.resource.CalDavTodoList;
 import at.bitfire.davdroid.resource.LocalCollection;
+import at.bitfire.davdroid.resource.LocalTaskList;
 import at.bitfire.davdroid.resource.RemoteCollection;
 
-public class CalendarsSyncAdapterService extends Service {
+public class TasksSyncAdapterService extends Service {
 	private static SyncAdapter syncAdapter;
 	
 	@Override
@@ -46,7 +39,7 @@ public class CalendarsSyncAdapterService extends Service {
 	
 
 	private static class SyncAdapter extends DavSyncAdapter {
-		private final static String TAG = "davdroid.CalendarsSyncAdapter";
+		private final static String TAG = "davdroid.TasksSyncAdapter";
 
 		
 		private SyncAdapter(Context context) {
@@ -63,15 +56,15 @@ public class CalendarsSyncAdapterService extends Service {
 			try {
 				Map<LocalCollection<?>, RemoteCollection<?>> map = new HashMap<LocalCollection<?>, RemoteCollection<?>>();
 				
-				for (LocalCalendar calendar : LocalCalendar.findAll(account, provider)) {
-					RemoteCollection<?> dav = new CalDavCalendar(httpClient, calendar.getUrl(), userName, password, preemptive);
-					map.put(calendar, dav);
+				for (LocalTaskList taskList : LocalTaskList.findAll(account, provider)) {
+					RemoteCollection<?> dav = new CalDavTodoList(httpClient, taskList.getUrl(), userName, password, preemptive);
+					map.put(taskList, dav);
 				}
 				return map;
 			} catch (RemoteException ex) {
-				Log.e(TAG, "Couldn't find local calendars", ex);
+				Log.e(TAG, "Couldn't find local task lists", ex);
 			} catch (URISyntaxException ex) {
-				Log.e(TAG, "Couldn't build calendar URI", ex);
+				Log.e(TAG, "Couldn't build task lists URI", ex);
 			}
 			
 			return null;

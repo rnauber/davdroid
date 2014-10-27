@@ -13,8 +13,6 @@ import at.bitfire.davdroid.webdav.DavMultiget;
 import ch.boye.httpclientandroidlib.impl.client.CloseableHttpClient;
 
 public class CalDavCalendar extends RemoteCollection<Event> { 
-	//private final static String TAG = "davdroid.CalDavCalendar";
-	
 	@Override
 	protected String memberContentType() {
 		return "text/calendar";

@@ -7,6 +7,8 @@
  ******************************************************************************/
 package at.bitfire.davdroid.syncadapter;
 
+import org.dmfs.provider.tasks.TaskContract;
+
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Fragment;
@@ -29,10 +31,13 @@ import at.bitfire.davdroid.Constants;
 import at.bitfire.davdroid.R;
 import at.bitfire.davdroid.resource.LocalCalendar;
 import at.bitfire.davdroid.resource.LocalStorageException;
+import at.bitfire.davdroid.resource.LocalTaskList;
 import at.bitfire.davdroid.resource.ServerInfo;
 
 public class AccountDetailsFragment extends Fragment implements TextWatcher {
-	public static final String KEY_SERVER_INFO = "server_info";
+	public static final String
+		TAG = "davdroid.AccountDetailsFragment",
+		KEY_SERVER_INFO = "server_info";
 	
 	ServerInfo serverInfo;
 	
@@ -84,7 +89,8 @@ public class AccountDetailsFragment extends Fragment implements TextWatcher {
 		AccountManager accountManager = AccountManager.get(getActivity());
 		Account account = new Account(accountName, Constants.ACCOUNT_TYPE);
 		Bundle userData = AccountSettings.createBundle(serverInfo);
-		
+
+		// contacts sync is per account
 		boolean syncContacts = false;
 		for (ServerInfo.ResourceInfo addressBook : serverInfo.getAddressBooks())
 			if (addressBook.isEnabled()) {
@@ -99,21 +105,38 @@ public class AccountDetailsFragment extends Fragment implements TextWatcher {
 			ContentResolver.setIsSyncable(account, ContactsContract.AUTHORITY, 0);
 		
 		if (accountManager.addAccountExplicitly(account, serverInfo.getPassword(), userData)) {
-			// account created, now create calendars
-			boolean syncCalendars = false;
+			// account created, now create calendars and task lists (if applicable)
+			boolean syncCalendars = false,
+					syncTasks = false;
 			for (ServerInfo.ResourceInfo calendar : serverInfo.getCalendars())
-				if (calendar.isEnabled())
-					try {
-						LocalCalendar.create(account, getActivity().getContentResolver(), calendar);
-						syncCalendars = true;
-					} catch (LocalStorageException e) {
-						Toast.makeText(getActivity(), "Couldn't create calendar(s): " + e.getMessage(), Toast.LENGTH_LONG).show();
-					}
+				if (calendar.isEnabled()) {
+					if (calendar.isForEvents())
+						try {
+							LocalCalendar.create(account, getActivity().getContentResolver(), calendar);
+							syncCalendars = true;
+						} catch (LocalStorageException e) {
+							Toast.makeText(getActivity(), "Couldn't create calendar: " + e.getMessage(), Toast.LENGTH_LONG).show();
+						}
+					if (calendar.isForTasks())
+						try {
+							LocalTaskList.create(account, getActivity().getContentResolver(), calendar);
+							syncTasks = true;
+						} catch (LocalStorageException e) {
+							Toast.makeText(getActivity(), "Couldn't create task list: " + e.getMessage(), Toast.LENGTH_LONG).show();
+						}
+				}
+			
 			if (syncCalendars) {
 				ContentResolver.setIsSyncable(account, CalendarContract.AUTHORITY, 1);
 				ContentResolver.setSyncAutomatically(account, CalendarContract.AUTHORITY, true);
 			} else
 				ContentResolver.setIsSyncable(account, CalendarContract.AUTHORITY, 0);
+			
+			if (syncTasks) {
+				ContentResolver.setIsSyncable(account, TaskContract.AUTHORITY, 1);
+				ContentResolver.setSyncAutomatically(account, TaskContract.AUTHORITY, true);
+			} else
+				ContentResolver.setIsSyncable(account, TaskContract.AUTHORITY, 0);
 			
 			getActivity().finish();				
 		} else
