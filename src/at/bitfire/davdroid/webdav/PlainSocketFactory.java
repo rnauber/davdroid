@@ -80,7 +80,6 @@ public class PlainSocketFactory extends PlainConnectionSocketFactory {
 
 
             socket = new Socket();
-            conn.opening(socket, target);
             socket.setSoTimeout(READ_TIMEOUT_MILLISECONDS);
             socket.connect(new InetSocketAddress(mProxyHost, mProxyPort), CONNECT_TIMEOUT_MILLISECONDS);
 
