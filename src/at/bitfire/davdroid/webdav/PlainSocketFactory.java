@@ -20,6 +20,30 @@ import ch.boye.httpclientandroidlib.impl.conn.DefaultClientConnectionOperator;
 import ch.boye.httpclientandroidlib.params.HttpParams;
 import ch.boye.httpclientandroidlib.protocol.HttpContext;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLPeerUnverifiedException;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocket;
+import org.apache.commons.lang.StringUtils;
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
+import android.net.SSLCertificateSocketFactory;
+import android.os.Build;
+import android.util.Log;
+import ch.boye.httpclientandroidlib.HttpHost;
+import ch.boye.httpclientandroidlib.conn.socket.LayeredConnectionSocketFactory;
+import ch.boye.httpclientandroidlib.conn.ssl.BrowserCompatHostnameVerifier;
+import ch.boye.httpclientandroidlib.protocol.HttpContext;
+
+
 public class PlainSocketFactory extends PlainConnectionSocketFactory {
 
 	private static final String TAG = "davdroid.PlainSocketFactory";
@@ -30,7 +54,6 @@ public class PlainSocketFactory extends PlainConnectionSocketFactory {
 
 	private String mProxyHost="127.0.0.1";
 	private int mProxyPort=9050;
-
 
 	@Override
 	public Socket connectSocket(int timeout, Socket plain, HttpHost host, InetSocketAddress remoteAddr, InetSocketAddress localAddr, HttpContext context) throws IOException {
@@ -77,7 +100,7 @@ public class PlainSocketFactory extends PlainConnectionSocketFactory {
             inputStream.readShort();
             inputStream.readInt();
 
-return (socket);
+return socket;
 
 }
 
