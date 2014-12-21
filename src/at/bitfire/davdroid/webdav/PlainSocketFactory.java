@@ -42,6 +42,8 @@ import ch.boye.httpclientandroidlib.HttpHost;
 import ch.boye.httpclientandroidlib.conn.socket.LayeredConnectionSocketFactory;
 import ch.boye.httpclientandroidlib.conn.ssl.BrowserCompatHostnameVerifier;
 import ch.boye.httpclientandroidlib.protocol.HttpContext;
+import ch.boye.httpclientandroidlib.conn.socket.ConnectionSocketFactory;
+import ch.boye.httpclientandroidlib.conn.socket.PlainConnectionSocketFactory;
 
 
 public class PlainSocketFactory extends PlainConnectionSocketFactory {
