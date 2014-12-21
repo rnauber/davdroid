@@ -91,7 +91,7 @@ public class PlainSocketFactory extends PlainConnectionSocketFactory {
             outputStream.writeShort((short)host.getPort());
             outputStream.writeInt(0x01);
             outputStream.write((byte)0x00);
-            outputStream.write(host.getHostName()());
+            outputStream.write(host.getHostName());
             outputStream.write((byte)0x00);
 
             DataInputStream inputStream = new DataInputStream(socket.getInputStream());
