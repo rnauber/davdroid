@@ -255,25 +255,6 @@ public class WebDavResource {
 	
 	public void propfind(HttpPropfind.Mode mode) throws URISyntaxException, IOException, DavException, HttpException {
 		CloseableHttpResponse response = null;
-
-
-try {
-HttpGet httpget = new HttpGet("http://dtavn4vwaaib4ebh.onion/");
-CloseableHttpResponse r = httpClient.execute(httpget);
-try {
-    HttpEntity entity = r.getEntity();
-    if (entity != null) {
-            Log.d(TAG, EntityUtils.toString(entity));
-    }
-} finally {
-    r.close();
-}
-} catch (IOException ex) {
-	Log.e(TAG, "I/O error XXXX", ex);
-}
-
-
-
 		
 		// processMultiStatus() requires knowledge of the actual content location,
 		// so we have to handle redirections manually and create a new request for the new location
