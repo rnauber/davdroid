@@ -20,7 +20,7 @@ import ch.boye.httpclientandroidlib.impl.conn.DefaultClientConnectionOperator;
 import ch.boye.httpclientandroidlib.params.HttpParams;
 import ch.boye.httpclientandroidlib.protocol.HttpContext;
 
-public class PlainSocketFactory extends DefaultClientConnectionOperator {
+public class PlainSocketFactory extends PlainConnectionSocketFactory {
 
 	private static final String TAG = "davdroid.PlainSocketFactory";
 	final static PlainSocketFactory INSTANCE = new PlainSocketFactory();
@@ -28,41 +28,15 @@ public class PlainSocketFactory extends DefaultClientConnectionOperator {
 	private static final int CONNECT_TIMEOUT_MILLISECONDS = 60000;
 	private static final int READ_TIMEOUT_MILLISECONDS = 60000;
 
-	private String mProxyHost;
-	private int mProxyPort;
-	    
-	public SocksProxyClientConnOperator(SchemeRegistry registry, String proxyHost, int proxyPort) {
-        super(registry);
-        
-        mProxyHost = proxyHost;
-        mProxyPort = proxyPort;
-    }
+	private String mProxyHost="127.0.0.1";
+	private int mProxyPort=9050;
 
-    // Derived from the original DefaultClientConnectionOperator.java in Apache HttpClient 4.2
-    @Override
-    public void openConnection(
-            final OperatedClientConnection conn,
-            final HttpHost target,
-            final InetAddress local,
-            final HttpContext context,
-            final HttpParams params) throws IOException {
-        Socket socket = null;
-        Socket sslSocket = null;
-        try {
-            if (conn == null || target == null || params == null) {
-                throw new IllegalArgumentException("Required argument may not be null");
-            }
-            if (conn.isOpen()) {
-                throw new IllegalStateException("Connection must not be open");
-            }
 
-            Scheme scheme = schemeRegistry.getScheme(target.getSchemeName());
-            SchemeSocketFactory schemeSocketFactory = scheme.getSchemeSocketFactory();
-
-            int port = scheme.resolvePort(target.getPort());
-            String host = target.getHostName();
-
-            // Perform explicit SOCKS4a connection request. SOCKS4a supports remote host name resolution
+	@Override
+	public Socket connectSocket(int timeout, Socket plain, HttpHost host, InetSocketAddress remoteAddr, InetSocketAddress localAddr, HttpContext context) throws IOException {
+		Log.d(TAG, "Preparing  palin connection with socks proxy " + host);
+		
+     // Perform explicit SOCKS4a connection request. SOCKS4a supports remote host name resolution
             // (i.e., Tor resolves the hostname, which may be an onion address).
             // The Android (Apache Harmony) Socket class appears to support only SOCKS4 and throws an
             // exception on an address created using INetAddress.createUnresolved() -- so the typical
@@ -103,46 +77,9 @@ public class PlainSocketFactory extends DefaultClientConnectionOperator {
             inputStream.readShort();
             inputStream.readInt();
 
-            if (schemeSocketFactory instanceof SSLSocketFactory)
-            {
-	            sslSocket = ((SSLSocketFactory)schemeSocketFactory).createLayeredSocket(socket, host, port, params);
-	            conn.opening(sslSocket, target);
-	            sslSocket.setSoTimeout(READ_TIMEOUT_MILLISECONDS);
-	            prepareSocket(sslSocket, context, params);
-	            conn.openCompleted(schemeSocketFactory.isSecure(sslSocket), params);
-            }
-            else
-            {
-            	conn.opening(socket,  target);
-            	socket.setSoTimeout(READ_TIMEOUT_MILLISECONDS);
-            	prepareSocket(socket, context, params);
-            	conn.openCompleted(schemeSocketFactory.isSecure(socket), params);
-            }
-            // TODO: clarify which connection throws java.net.SocketTimeoutException?
-        } catch (IOException e) {
-            try {
-                if (sslSocket != null) {
-                    sslSocket.close();
-                }
-                if (socket != null) {
-                    socket.close();
-                }
-            } catch (IOException ioe) {}
-            throw e;
-        }
-    }
+return (socket);
 
-    @Override
-    public void updateSecureConnection(
-            final OperatedClientConnection conn,
-            final HttpHost target,
-            final HttpContext context,
-            final HttpParams params) throws IOException {
-        throw new RuntimeException("operation not supported");
-    }
+}
 
-    @Override
-    protected InetAddress[] resolveHostname(final String host) throws UnknownHostException {
-        throw new RuntimeException("operation not supported");
-    }
+
 }
