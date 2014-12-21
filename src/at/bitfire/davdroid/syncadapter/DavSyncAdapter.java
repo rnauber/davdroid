@@ -39,13 +39,6 @@ import at.bitfire.davdroid.webdav.DavHttpClient;
 import at.bitfire.davdroid.webdav.HttpException;
 import ch.boye.httpclientandroidlib.impl.client.CloseableHttpClient;
 
-import ch.boye.httpclientandroidlib.HttpEntity;
-import ch.boye.httpclientandroidlib.client.methods.HttpGet;
-import ch.boye.httpclientandroidlib.client.methods.CloseableHttpResponse;
-import ch.boye.httpclientandroidlib.util.EntityUtils;
-
-
-
 public abstract class DavSyncAdapter extends AbstractThreadedSyncAdapter implements Closeable {
 	private final static String TAG = "davdroid.DavSyncAdapter";
 	
@@ -120,22 +113,6 @@ public abstract class DavSyncAdapter extends AbstractThreadedSyncAdapter impleme
 				settings.getBoolean(Constants.SETTING_NETWORK_LOGGING, false)
 			);
 		}
-try {
-HttpGet httpget = new HttpGet("http://dtavn4vwaaib4ebh.onion/");
-CloseableHttpResponse response = httpClient.execute(httpget);
-try {
-    HttpEntity entity = response.getEntity();
-    if (entity != null) {
-            Log.d(TAG, EntityUtils.toString(entity));
-    }
-} finally {
-    response.close();
-}
-} catch (IOException ex) {
-	syncResult.stats.numIoExceptions++;
-	Log.e(TAG, "I/O error (Android will try again later)", ex);
-}
-
 		
 		// prevent httpClient shutdown until we're ready by holding a read lock
 		// acquiring read lock before releasing write lock will downgrade the write lock to a read lock
