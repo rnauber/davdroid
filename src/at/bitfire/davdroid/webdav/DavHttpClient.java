@@ -14,6 +14,7 @@ import ch.boye.httpclientandroidlib.config.Registry;
 import ch.boye.httpclientandroidlib.config.RegistryBuilder;
 import ch.boye.httpclientandroidlib.conn.socket.ConnectionSocketFactory;
 import ch.boye.httpclientandroidlib.conn.socket.PlainConnectionSocketFactory;
+import ch.boye.httpclientandroidlib.HttpHost;
 import ch.boye.httpclientandroidlib.impl.client.CloseableHttpClient;
 import ch.boye.httpclientandroidlib.impl.client.HttpClientBuilder;
 import ch.boye.httpclientandroidlib.impl.client.HttpClients;
