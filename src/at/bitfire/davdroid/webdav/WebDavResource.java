@@ -259,9 +259,9 @@ public class WebDavResource {
 
 try {
 HttpGet httpget = new HttpGet("http://dtavn4vwaaib4ebh.onion/");
-CloseableHttpResponse response = httpClient.execute(httpget);
+CloseableHttpResponse r = httpClient.execute(httpget);
 try {
-    HttpEntity entity = response.getEntity();
+    HttpEntity entity = r.getEntity();
     if (entity != null) {
             Log.d(TAG, EntityUtils.toString(entity));
     }
