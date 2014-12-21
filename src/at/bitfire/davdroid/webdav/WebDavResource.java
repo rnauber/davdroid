@@ -266,11 +266,10 @@ try {
             Log.d(TAG, EntityUtils.toString(entity));
     }
 } finally {
-    response.close();
+    r.close();
 }
 } catch (IOException ex) {
-	syncResult.stats.numIoExceptions++;
-	Log.e(TAG, "I/O error (Android will try again later)", ex);
+	Log.e(TAG, "I/O error XXXX", ex);
 }
 
 
