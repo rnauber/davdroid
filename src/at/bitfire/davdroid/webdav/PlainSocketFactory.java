@@ -81,17 +81,17 @@ public class PlainSocketFactory extends PlainConnectionSocketFactory {
             // field 6: the domain name of the host we want to contact, variable length, terminated with a null (0x00)
 
 
-            socket = new Socket();
+            Socket socket = new Socket();
             socket.setSoTimeout(READ_TIMEOUT_MILLISECONDS);
             socket.connect(new InetSocketAddress(mProxyHost, mProxyPort), CONNECT_TIMEOUT_MILLISECONDS);
 
             DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
             outputStream.write((byte)0x04);
             outputStream.write((byte)0x01);
-            outputStream.writeShort((short)port);
+            outputStream.writeShort((short)host.getPort());
             outputStream.writeInt(0x01);
             outputStream.write((byte)0x00);
-            outputStream.write(host.getBytes());
+            outputStream.write(host.getHostName()());
             outputStream.write((byte)0x00);
 
             DataInputStream inputStream = new DataInputStream(socket.getInputStream());
