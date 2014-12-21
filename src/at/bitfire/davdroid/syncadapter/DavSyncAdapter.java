@@ -40,8 +40,9 @@ import at.bitfire.davdroid.webdav.HttpException;
 import ch.boye.httpclientandroidlib.impl.client.CloseableHttpClient;
 
 import ch.boye.httpclientandroidlib.HttpEntity;
-import ch.boye.httpclientandroidlib.HttpGet;
+import ch.boye.httpclientandroidlib.client.methods.HttpGet;
 import ch.boye.httpclientandroidlib.client.methods.CloseableHttpResponse;
+import ch.boye.httpclientandroidlib.util.EntityUtils;
 
 
 
