@@ -39,6 +39,12 @@ import at.bitfire.davdroid.webdav.DavHttpClient;
 import at.bitfire.davdroid.webdav.HttpException;
 import ch.boye.httpclientandroidlib.impl.client.CloseableHttpClient;
 
+import ch.boye.httpclientandroidlib.HttpEntity;
+import ch.boye.httpclientandroidlib.HttpGet;
+import ch.boye.httpclientandroidlib.client.methods.CloseableHttpResponse;
+
+
+
 public abstract class DavSyncAdapter extends AbstractThreadedSyncAdapter implements Closeable {
 	private final static String TAG = "davdroid.DavSyncAdapter";
 	
