@@ -56,7 +56,7 @@ public class DavHttpClient {
 				.setUserAgent("DAVdroid/" + Constants.APP_VERSION)
 				.disableCookieManagement();
 		
-		HttpHost proxy = new HttpHost("127.0.0.1", 8080);		
+		HttpHost proxy = new HttpHost("127.0.0.1", 8118);		
 		builder=builder.setProxy(proxy);
 		
 		
