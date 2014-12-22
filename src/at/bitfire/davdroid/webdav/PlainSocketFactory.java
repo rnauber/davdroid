@@ -115,11 +115,6 @@ public class PlainSocketFactory extends PlainConnectionSocketFactory {
 
 	}
 
-	@Override
-	public Socket createLayeredSocket(Socket plain, String host, int port, HttpContext context) throws IOException, UnknownHostException {
-		Log.d(TAG, "Preparing layered connection (over proxy) to " + host);
-		return plain;
-	}
 
 
 }
