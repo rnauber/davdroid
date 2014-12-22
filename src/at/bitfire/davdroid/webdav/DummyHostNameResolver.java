@@ -17,8 +17,8 @@ public class DummyHostNameResolver implements DnsResolver {
 	private final static String TAG = "davdroid.DummyHostNameResolver";
 	
 
-public InetAddress resolve (String hostname){
-		Log.d(TAG, "Dummy-resolving " + hostname);
+public InetAddress[] resolve (String host){
+		Log.d(TAG, "Dummy-resolving " + host);
 		byte[] ip = new byte[]{1, 1, 1, 1};
 		return InetAddress.getByAddress(ip);
 }
