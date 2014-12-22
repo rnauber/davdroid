@@ -20,7 +20,8 @@ public class DummyHostNameResolver implements DnsResolver {
 public InetAddress[] resolve (String host){
 		Log.d(TAG, "Dummy-resolving " + host);
 		byte[] ip = new byte[]{1, 1, 1, 1};
-		return {InetAddress.getByAddress(ip)};
+		InetAddress[] ips= new InetAddress[] {InetAddress.getByAddress(ip)};
+		return ips;
 }
 }
 	
