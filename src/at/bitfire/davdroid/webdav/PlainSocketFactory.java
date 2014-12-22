@@ -60,7 +60,7 @@ public class PlainSocketFactory extends PlainConnectionSocketFactory {
 
 	@Override
 	public Socket createSocket(HttpContext context) throws IOException {
-		return createSocket()
+		return createSocket();
 	}
 
 
@@ -80,7 +80,7 @@ final InetSocketAddress remoteAddress,
 final InetSocketAddress localAddress,
 final HttpParams params) throws IOException {
 
-		hoststr=remoteAddress.getHostString()
+		hoststr=remoteAddress.getHostString();
 		Log.d(TAG, "connectSocket: Preparing plain connection with socks proxy to " + hoststr);
 
 
