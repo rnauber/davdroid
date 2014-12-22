@@ -62,10 +62,12 @@ public class DavHttpClient {
 			builder = builder.disableContentCompression();
 		}
 
-		if (logTraffic)
+		if (logTraffic){
 			Log.d(TAG, "Logging network traffic for debugging purposes");
 		ManagedHttpClientConnectionFactory.INSTANCE.wirelog.enableDebug(logTraffic);
 		ManagedHttpClientConnectionFactory.INSTANCE.log.enableDebug(logTraffic);
+		}
+
 
 		return builder.build();
 	}

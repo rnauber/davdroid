@@ -18,17 +18,18 @@ public class DummyHostNameResolver implements DnsResolver {
 	private final static String TAG = "davdroid.DummyHostNameResolver";
 	
 
-public InetAddress[] resolve (String host){
+	public InetAddress[] resolve (String host){
 		Log.d(TAG, "Dummy-resolving " + host);
 		byte[] ipbytes = new byte[]{127, 0, 0, 1};
-		     try {
-          InetAddress ip = InetAddress.getByAddress(ipbytes);
-       }
-        catch (UnknownHostException e) {
-Log.d(TAG, "WTF?" + e);
-}
+		InetAddress ip;
+		try {
+        		ip = InetAddress.getByAddress(ipbytes);
+       		}
+        	catch (UnknownHostException e) {
+			Log.d(TAG, "WTF?" + e);
+		}
 
-		InetAddress[] ips= new InetAddress[] {};
+		InetAddress[] ips= new InetAddress[] {ip};
 		return ips;
 }
 }
