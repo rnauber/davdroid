@@ -21,7 +21,7 @@ public class DummyHostNameResolver implements DnsResolver {
 	public InetAddress[] resolve (String host){
 		Log.d(TAG, "Dummy-resolving " + host);
 		byte[] ipbytes = new byte[]{127, 0, 0, 1};
-		InetAddress ip;
+		InetAddress ip=null;
 		try {
         		ip = InetAddress.getByAddress(ipbytes);
        		}
