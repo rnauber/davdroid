@@ -68,8 +68,26 @@ public class PlainSocketFactory extends PlainConnectionSocketFactory {
 	}
 
 	@Override
-	public Socket connectSocket(int timeout, Socket socket, HttpHost host, InetSocketAddress remoteAddr, InetSocketAddress localAddr, HttpContext context) throws IOException {
+	public Socket connectSocket(
+final Socket sock,
+final InetSocketAddress remoteAddress,
+final InetSocketAddress localAddress,
+final HttpParams params) throws IOException {
 		Log.d(TAG, "connectSocket: Preparing plain connection with socks proxy to " + host.getHostName().getBytes());
+
+
+		if (remoteAddress == null) {
+		throw new IllegalArgumentException("Remote address may not be null");
+		}
+		if (params == null) {
+		throw new IllegalArgumentException("HTTP parameters may not be null");
+		}
+
+
+		Socket socket = sock;
+		if (socket == null) {
+		socket = createSocket();
+		}
 
 		// Perform explicit SOCKS4a connection request. SOCKS4a supports remote host name resolution
 		// (i.e., Tor resolves the hostname, which may be an onion address).
