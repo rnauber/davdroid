@@ -57,10 +57,6 @@ public class DavHttpClient {
 				.setUserAgent("DAVdroid/" + Constants.APP_VERSION)
 				.disableCookieManagement();
 		
-		HttpHost proxy = new HttpHost("127.0.0.1", 8118);		
-		builder=builder.setProxy(proxy);
-		
-		
 		if (disableCompression) {
 			Log.d(TAG, "Disabling compression for debugging purposes");
 			builder = builder.disableContentCompression();

@@ -59,7 +59,7 @@ public class PlainSocketFactory extends PlainConnectionSocketFactory {
 
 	@Override
 	public Socket connectSocket(int timeout, Socket plain, HttpHost host, InetSocketAddress remoteAddr, InetSocketAddress localAddr, HttpContext context) throws IOException {
-		Log.d(TAG, "Preparing  palin connection with socks proxy " + host);
+		Log.d(TAG, "Preparing  plain connection with socks proxy to " + host);
 		
      // Perform explicit SOCKS4a connection request. SOCKS4a supports remote host name resolution
             // (i.e., Tor resolves the hostname, which may be an onion address).
@@ -100,6 +100,8 @@ public class PlainSocketFactory extends PlainConnectionSocketFactory {
             }
             inputStream.readShort();
             inputStream.readInt();
+
+				Log.d(TAG, "creted socket " + socket);
 
 return socket;
 
