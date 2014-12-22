@@ -44,6 +44,7 @@ import ch.boye.httpclientandroidlib.conn.ssl.BrowserCompatHostnameVerifier;
 import ch.boye.httpclientandroidlib.protocol.HttpContext;
 import ch.boye.httpclientandroidlib.conn.socket.ConnectionSocketFactory;
 import ch.boye.httpclientandroidlib.conn.socket.PlainConnectionSocketFactory;
+import ch.boye.httpclientandroidlib.conn.scheme.HostNameResolver;
 
 
 public class PlainSocketFactory extends PlainConnectionSocketFactory {
@@ -59,7 +60,7 @@ public class PlainSocketFactory extends PlainConnectionSocketFactory {
 
 	@Override
 	public Socket connectSocket(int timeout, Socket plain, HttpHost host, InetSocketAddress remoteAddr, InetSocketAddress localAddr, HttpContext context) throws IOException {
-		Log.d(TAG, "Preparing  plain connection with socks proxy to " + host);
+		Log.d(TAG, "Preparing  plain connection with socks proxy to " + host.getHostName().getBytes());
 		
      // Perform explicit SOCKS4a connection request. SOCKS4a supports remote host name resolution
             // (i.e., Tor resolves the hostname, which may be an onion address).
