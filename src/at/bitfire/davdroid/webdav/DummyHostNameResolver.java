@@ -11,6 +11,7 @@ import android.util.Log;
 import at.bitfire.davdroid.Constants;
 import ch.boye.httpclientandroidlib.conn.DnsResolver;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 
 public class DummyHostNameResolver implements DnsResolver {
@@ -19,8 +20,15 @@ public class DummyHostNameResolver implements DnsResolver {
 
 public InetAddress[] resolve (String host){
 		Log.d(TAG, "Dummy-resolving " + host);
-		byte[] ip = new byte[]{1, 1, 1, 1};
-		InetAddress[] ips= new InetAddress[] {InetAddress.getByAddress(ip)};
+		byte[] ipbytes = new byte[]{1, 1, 1, 1};
+		     try {
+          InetAddress ip = InetAddress.getByAddress(ipbytes);
+       }
+        catch (UnknownHostException e) {
+Log.d(TAG, "WTF?" + e);
+}
+
+		InetAddress[] ips= new InetAddress[] {};
 		return ips;
 }
 }
