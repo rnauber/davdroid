@@ -84,7 +84,7 @@ public Socket connectSocket(int connectTimeout,
 {
 
 		String hoststr=host.getHostName();
-		short hoatport=host.getPort()
+		short hoatport=host.getPort();
 		
 		Log.d(TAG, "connectSocket: Preparing plain connection with socks proxy to " + hoststr);
 
