@@ -57,8 +57,16 @@ public class PlainSocketFactory extends PlainConnectionSocketFactory {
 	private String mProxyHost="127.0.0.1";
 	private int mProxyPort=9050;
 
+
 	@Override
-	public Socket connectSocket(int timeout, Socket plain, HttpHost host, InetSocketAddress remoteAddr, InetSocketAddress localAddr, HttpContext context) throws IOException {
+	public Socket createSocket(HttpContext context) throws IOException {
+          Socket socket = new Socket();
+       socket.setSoTimeout(READ_TIMEOUT_MILLISECONDS);
+  return socket;
+	}
+
+	@Override
+	public Socket connectSocket(int timeout, Socket socket, HttpHost host, InetSocketAddress remoteAddr, InetSocketAddress localAddr, HttpContext context) throws IOException {
 		Log.d(TAG, "Preparing  plain connection with socks proxy to " + host.getHostName().getBytes());
 		
      // Perform explicit SOCKS4a connection request. SOCKS4a supports remote host name resolution
@@ -81,9 +89,8 @@ public class PlainSocketFactory extends PlainConnectionSocketFactory {
             // field 6: the domain name of the host we want to contact, variable length, terminated with a null (0x00)
 
 
-            Socket socket = new Socket();
-            socket.setSoTimeout(READ_TIMEOUT_MILLISECONDS);
-            socket.connect(new InetSocketAddress(mProxyHost, mProxyPort), CONNECT_TIMEOUT_MILLISECONDS);
+  
+               socket.connect(new InetSocketAddress(mProxyHost, mProxyPort), CONNECT_TIMEOUT_MILLISECONDS);
 
             DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
             outputStream.write((byte)0x04);
