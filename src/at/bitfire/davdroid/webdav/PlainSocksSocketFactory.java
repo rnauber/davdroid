@@ -74,13 +74,18 @@ public class PlainSocksSocketFactory extends PlainConnectionSocketFactory {
 
 
 	@Override
-	public Socket connectSocket(
-final Socket sock,
-final InetSocketAddress remoteAddress,
-final InetSocketAddress localAddress,
-final HttpParams params) throws IOException {
+public Socket connectSocket(int connectTimeout,
+                   Socket socket,
+                   HttpHost host,
+                   InetSocketAddress remoteAddress,
+                   InetSocketAddress localAddress,
+                   HttpContext context)
+                     throws IOException
+{
 
-		String hoststr=remoteAddress.getHostString();
+		String hoststr=host.getHostName();
+		short hoatport=host.getPort()
+		
 		Log.d(TAG, "connectSocket: Preparing plain connection with socks proxy to " + hoststr);
 
 
@@ -116,12 +121,12 @@ final HttpParams params) throws IOException {
 		// field 5: the user ID string, variable length, terminated with a null (0x00)
 		// field 6: the domain name of the host we want to contact, variable length, terminated with a null (0x00)
 
-		socket.connect(new InetSocketAddress(mProxyHost, mProxyPort), CONNECT_TIMEOUT_MILLISECONDS);
+		socket.connect(new InetSocketAddress(mProxyHost, mProxyPort), connectTimeout);
 
 		DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
 		outputStream.write((byte)0x04);
 		outputStream.write((byte)0x01);
-		outputStream.writeShort((short)remoteAddress.getPort());
+		outputStream.writeShort((short)hostport);
 		outputStream.writeInt(0x01);
 		outputStream.write((byte)0x00);
 		outputStream.write(hoststr.getBytes());
