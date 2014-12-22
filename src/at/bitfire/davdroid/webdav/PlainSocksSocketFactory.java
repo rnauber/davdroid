@@ -57,7 +57,10 @@ public class PlainSocksSocketFactory extends PlainConnectionSocketFactory {
 	private String mProxyHost="127.0.0.1";
 	private int mProxyPort=9050;
 
+ public PlainSocksSocketFactory() {
+		Log.d(TAG, "PlainSocksSocketFactory constructor ");
 
+}
 	@Override
 	public Socket createSocket(HttpContext context) throws IOException {
 		return createSocket();
