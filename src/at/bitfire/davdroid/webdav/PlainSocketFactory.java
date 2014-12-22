@@ -46,7 +46,7 @@ import ch.boye.httpclientandroidlib.conn.socket.ConnectionSocketFactory;
 import ch.boye.httpclientandroidlib.conn.socket.PlainConnectionSocketFactory;
 
 
-public class PlainSocketFactory extends PlainConnectionSocketFactory {
+public class PlainSocksSocketFactory extends PlainConnectionSocketFactory {
 
 	private static final String TAG = "davdroid.PlainSocketFactory";
 	final static PlainSocketFactory INSTANCE = new PlainSocketFactory();
@@ -80,7 +80,7 @@ final InetSocketAddress remoteAddress,
 final InetSocketAddress localAddress,
 final HttpParams params) throws IOException {
 
-		hoststr=remoteAddress.getHostString();
+		String hoststr=remoteAddress.getHostString();
 		Log.d(TAG, "connectSocket: Preparing plain connection with socks proxy to " + hoststr);
 
 

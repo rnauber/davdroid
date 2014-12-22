@@ -29,7 +29,7 @@ public class DavHttpClient {
 		
 	static {
 		socketFactoryRegistry =	RegistryBuilder.<ConnectionSocketFactory> create()
-				.register("http", PlainSocketFactory.INSTANCE)
+				.register("http", PlainSocksSocketFactory.INSTANCE)
 				.register("https", TlsSniSocketFactory.INSTANCE)
 				.build();
 		
