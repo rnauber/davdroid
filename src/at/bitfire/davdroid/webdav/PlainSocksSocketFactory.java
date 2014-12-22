@@ -75,7 +75,7 @@ public class PlainSocksSocketFactory extends PlainConnectionSocketFactory {
 
 	@Override
 public Socket connectSocket(int connectTimeout,
-                   Socket socket,
+                   Socket sock,
                    HttpHost host,
                    InetSocketAddress remoteAddress,
                    InetSocketAddress localAddress,
@@ -84,16 +84,12 @@ public Socket connectSocket(int connectTimeout,
 {
 
 		String hoststr=host.getHostName();
-		short hoatport=host.getPort();
+		short hostport=host.getPort();
 		
 		Log.d(TAG, "connectSocket: Preparing plain connection with socks proxy to " + hoststr);
 
-
 		if (remoteAddress == null) {
 		throw new IllegalArgumentException("Remote address may not be null");
-		}
-		if (params == null) {
-		throw new IllegalArgumentException("HTTP parameters may not be null");
 		}
 
 
