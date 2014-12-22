@@ -9,17 +9,18 @@ package at.bitfire.davdroid.webdav;
 
 import android.util.Log;
 import at.bitfire.davdroid.Constants;
-import ch.boye.httpclientandroidlib.conn.scheme.HostNameResolver;
+import ch.boye.httpclientandroidlib.conn.DnsResolver;
 import java.net.InetAddress;
 
 
-public class DummyHostNameResolver implements HostNameResolver {
-	private final static String TAG = "davdroid.DavHttpClient";
+public class DummyHostNameResolver implements DnsResolver {
+	private final static String TAG = "davdroid.DummyHostNameResolver";
 	
 
 public InetAddress resolve (String hostname){
 		Log.d(TAG, "Dummy-resolving " + hostname);
-		return InetAddress.getByName("1.1.1.1");
+		byte[] ip = new byte[]{1, 1, 1, 1};
+		return InetAddress.getByAddress(ip);
 }
 }
 	

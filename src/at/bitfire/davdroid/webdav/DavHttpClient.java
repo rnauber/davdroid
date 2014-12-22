@@ -43,7 +43,7 @@ public class DavHttpClient {
 
 
 	public static CloseableHttpClient create(boolean disableCompression, boolean logTraffic) {
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry,new DummyHostNameResolver());
 		// limits per DavHttpClient (= per DavSyncAdapter extends AbstractThreadedSyncAdapter)
 		connectionManager.setMaxTotal(3);				// max.  3 connections in total
 		connectionManager.setDefaultMaxPerRoute(2);		// max.  2 connections per host

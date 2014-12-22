@@ -44,13 +44,12 @@ import ch.boye.httpclientandroidlib.conn.ssl.BrowserCompatHostnameVerifier;
 import ch.boye.httpclientandroidlib.protocol.HttpContext;
 import ch.boye.httpclientandroidlib.conn.socket.ConnectionSocketFactory;
 import ch.boye.httpclientandroidlib.conn.socket.PlainConnectionSocketFactory;
-import ch.boye.httpclientandroidlib.conn.scheme.HostNameResolver;
 
 
 public class PlainSocketFactory extends PlainConnectionSocketFactory {
 
 	private static final String TAG = "davdroid.PlainSocketFactory";
-	final static PlainSocketFactory INSTANCE = new PlainSocketFactory(new DummyHostNameResolver());
+	final static PlainSocketFactory INSTANCE = new PlainSocketFactory();
 
 	private static final int CONNECT_TIMEOUT_MILLISECONDS = 60000;
 	private static final int READ_TIMEOUT_MILLISECONDS = 60000;
