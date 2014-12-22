@@ -60,6 +60,11 @@ public class PlainSocketFactory extends PlainConnectionSocketFactory {
 
 	@Override
 	public Socket createSocket(HttpContext context) throws IOException {
+		return createSocket()
+	}
+
+
+	public Socket createSocket() throws IOException {
 		Log.d(TAG, "createSocket: Preparing plain connection with socks proxy ");
 
 		Socket socket = new Socket();
@@ -67,13 +72,16 @@ public class PlainSocketFactory extends PlainConnectionSocketFactory {
 		return socket;
 	}
 
+
 	@Override
 	public Socket connectSocket(
 final Socket sock,
 final InetSocketAddress remoteAddress,
 final InetSocketAddress localAddress,
 final HttpParams params) throws IOException {
-		Log.d(TAG, "connectSocket: Preparing plain connection with socks proxy to " + host.getHostName().getBytes());
+
+		hoststr=remoteAddress.getHostString()
+		Log.d(TAG, "connectSocket: Preparing plain connection with socks proxy to " + hoststr);
 
 
 		if (remoteAddress == null) {
@@ -113,15 +121,15 @@ final HttpParams params) throws IOException {
 		DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
 		outputStream.write((byte)0x04);
 		outputStream.write((byte)0x01);
-		outputStream.writeShort((short)host.getPort());
+		outputStream.writeShort((short)remoteAddress.getPort());
 		outputStream.writeInt(0x01);
 		outputStream.write((byte)0x00);
-		outputStream.write(host.getHostName().getBytes());
+		outputStream.write(hoststr.getBytes());
 		outputStream.write((byte)0x00);
 
 		DataInputStream inputStream = new DataInputStream(socket.getInputStream());
 		if (inputStream.readByte() != (byte)0x00 || inputStream.readByte() != (byte)0x5a) {
-			Log.d(TAG, "SOCKS4a connect failed to " + host.getHostName().getBytes());
+			Log.d(TAG, "SOCKS4a connect failed to " + hoststr);
 			throw new IOException("SOCKS4a connect failed");
 		}
 		inputStream.readShort();
