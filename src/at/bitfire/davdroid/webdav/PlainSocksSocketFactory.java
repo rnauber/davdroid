@@ -63,10 +63,11 @@ public class PlainSocksSocketFactory extends PlainConnectionSocketFactory {
 }
 	@Override
 	public Socket createSocket(HttpContext context) throws IOException {
+		Log.d(TAG, "createSocket");
 		return createSocket();
 	}
 
-
+	@Override
 	public Socket createSocket() throws IOException {
 		Log.d(TAG, "createSocket: Preparing plain connection with socks proxy ");
 

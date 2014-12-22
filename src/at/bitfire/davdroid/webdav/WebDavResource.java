@@ -259,6 +259,7 @@ public class WebDavResource {
 		// processMultiStatus() requires knowledge of the actual content location,
 		// so we have to handle redirections manually and create a new request for the new location
 		for (int i = context.getRequestConfig().getMaxRedirects(); i > 0; i--) {
+			Log.d(TAG, "PROPFIND on: " + location);
 			HttpPropfind propfind = new HttpPropfind(location.toURI(), mode);
 			response = httpClient.execute(propfind, context);
 			
