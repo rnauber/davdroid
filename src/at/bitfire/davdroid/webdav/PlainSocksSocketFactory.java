@@ -49,7 +49,7 @@ import ch.boye.httpclientandroidlib.conn.socket.PlainConnectionSocketFactory;
 public class PlainSocksSocketFactory extends PlainConnectionSocketFactory {
 
 	private static final String TAG = "davdroid.PlainSocketFactory";
-	final static PlainSocketFactory INSTANCE = new PlainSocketFactory();
+	final static PlainSocketFactory INSTANCE = new PlainSocksSocketFactory();
 
 	private static final int CONNECT_TIMEOUT_MILLISECONDS = 60000;
 	private static final int READ_TIMEOUT_MILLISECONDS = 60000;
