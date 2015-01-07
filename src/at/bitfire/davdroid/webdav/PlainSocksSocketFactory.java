@@ -57,90 +57,88 @@ public class PlainSocksSocketFactory extends PlainConnectionSocketFactory {
 	private String mProxyHost="127.0.0.1";
 	private int mProxyPort=9050;
 
- public PlainSocksSocketFactory() {
-		Log.d(TAG, "PlainSocksSocketFactory constructor ");
-
-}
-	@Override
-	public Socket createSocket(HttpContext context) throws IOException {
-		Log.d(TAG, "createSocket");
-		return createSocket();
-	}
-
 	public Socket createSocket() throws IOException {
 		Log.d(TAG, "createSocket: Preparing plain connection with socks proxy ");
 
 		Socket socket = new Socket();
-		socket.setSoTimeout(READ_TIMEOUT_MILLISECONDS);
 		return socket;
 	}
 
 
 	@Override
-public Socket connectSocket(int connectTimeout,
+	public Socket connectSocket(int connectTimeout,
                    Socket sock,
                    HttpHost host,
                    InetSocketAddress remoteAddress,
                    InetSocketAddress localAddress,
                    HttpContext context)
                      throws IOException
-{
+	{
 
 		String hoststr=host.getHostName();
 		int hostport=host.getPort();
+		boolean useSocks=0;
 		
-		Log.d(TAG, "connectSocket: Preparing plain connection with socks proxy to " + hoststr);
+		//Log.d(TAG, "connectSocket: Preparing plain connection with socks proxy to " + hoststr);
 
 		if (remoteAddress == null) {
-		throw new IllegalArgumentException("Remote address may not be null");
+			throw new IllegalArgumentException("Remote address may not be null");
 		}
-
+		
 
 		Socket socket = sock;
 		if (socket == null) {
-		socket = createSocket();
+			socket = createSocket();
 		}
 
-		// Perform explicit SOCKS4a connection request. SOCKS4a supports remote host name resolution
-		// (i.e., Tor resolves the hostname, which may be an onion address).
-		// The Android (Apache Harmony) Socket class appears to support only SOCKS4 and throws an
-		// exception on an address created using INetAddress.createUnresolved() -- so the typical
-		// technique for using Java SOCKS4a/5 doesn't appear to work on Android:
-		// https://android.googlesource.com/platform/libcore/+/master/luni/src/main/java/java/net/PlainSocketImpl.java
-		// See also: http://www.mit.edu/~foley/TinFoil/src/tinfoil/TorLib.java, for a similar implementation
+		if (useSocks){
 
-		// From http://en.wikipedia.org/wiki/SOCKS#SOCKS4a:
-		//
-		// field 1: SOCKS version number, 1 byte, must be 0x04 for this version
-		// field 2: command code, 1 byte:
-		//     0x01 = establish a TCP/IP stream connection
-		//     0x02 = establish a TCP/IP port binding
-		// field 3: network byte order port number, 2 bytes
-		// field 4: deliberate invalid IP address, 4 bytes, first three must be 0x00 and the last one must not be 0x00
-		// field 5: the user ID string, variable length, terminated with a null (0x00)
-		// field 6: the domain name of the host we want to contact, variable length, terminated with a null (0x00)
 
-		socket.connect(new InetSocketAddress(mProxyHost, mProxyPort), connectTimeout);
+			// Perform explicit SOCKS4a connection request. SOCKS4a supports remote host name resolution
+			// (i.e., Tor resolves the hostname, which may be an onion address).
+			// The Android (Apache Harmony) Socket class appears to support only SOCKS4 and throws an
+			// exception on an address created using INetAddress.createUnresolved() -- so the typical
+			// technique for using Java SOCKS4a/5 doesn't appear to work on Android:
+			// https://android.googlesource.com/platform/libcore/+/master/luni/src/main/java/java/net/PlainSocketImpl.java
+			// See also: http://www.mit.edu/~foley/TinFoil/src/tinfoil/TorLib.java, for a similar implementation
 
-		DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
-		outputStream.write((byte)0x04);
-		outputStream.write((byte)0x01);
-		outputStream.writeShort((short)hostport);
-		outputStream.writeInt(0x01);
-		outputStream.write((byte)0x00);
-		outputStream.write(hoststr.getBytes());
-		outputStream.write((byte)0x00);
+			// From http://en.wikipedia.org/wiki/SOCKS#SOCKS4a:
+			//
+			// field 1: SOCKS version number, 1 byte, must be 0x04 for this version
+			// field 2: command code, 1 byte:
+			//     0x01 = establish a TCP/IP stream connection
+			//     0x02 = establish a TCP/IP port binding
+			// field 3: network byte order port number, 2 bytes
+			// field 4: deliberate invalid IP address, 4 bytes, first three must be 0x00 and the last one must not be 0x00
+			// field 5: the user ID string, variable length, terminated with a null (0x00)
+			// field 6: the domain name of the host we want to contact, variable length, terminated with a null (0x00)
 
-		DataInputStream inputStream = new DataInputStream(socket.getInputStream());
-		if (inputStream.readByte() != (byte)0x00 || inputStream.readByte() != (byte)0x5a) {
-			Log.d(TAG, "SOCKS4a connect failed to " + hoststr);
-			throw new IOException("SOCKS4a connect failed");
+
+			socket.connect(new InetSocketAddress(mProxyHost, mProxyPort), connectTimeout);
+
+			DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
+			outputStream.write((byte)0x04);
+			outputStream.write((byte)0x01);
+			outputStream.writeShort((short)hostport);
+			outputStream.writeInt(0x01);
+			outputStream.write((byte)0x00);
+			outputStream.write(hoststr.getBytes());
+			outputStream.write((byte)0x00);
+
+			DataInputStream inputStream = new DataInputStream(socket.getInputStream());
+			if (inputStream.readByte() != (byte)0x00 || inputStream.readByte() != (byte)0x5a) {
+				Log.d(TAG, "SOCKS4a connect failed to " + hoststr);
+				throw new IOException("SOCKS4a connect failed");
+			}
+			inputStream.readShort();
+			inputStream.readInt();
+
+		else
+		{
+			sock.connect(remoteAddress, connectTimeout);
 		}
-		inputStream.readShort();
-		inputStream.readInt();
 
-		Log.d(TAG, "created socket " + socket);
-
+		//Log.d(TAG, "created socket " + socket);
 		return socket;
 
 	}

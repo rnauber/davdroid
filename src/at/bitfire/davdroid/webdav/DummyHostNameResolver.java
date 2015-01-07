@@ -19,18 +19,25 @@ public class DummyHostNameResolver implements DnsResolver {
 	
 
 	public InetAddress[] resolve (String host){
-		Log.d(TAG, "Dummy-resolving " + host);
-		byte[] ipbytes = new byte[]{127, 0, 0, 1};
 		InetAddress ip=null;
-		try {
-        		ip = InetAddress.getByAddress(ipbytes);
-       		}
-        	catch (UnknownHostException e) {
-			Log.d(TAG, "WTF?" + e);
+
+		if (host.endsWith(".onion")) {
+			Log.d(TAG, "Dummy-resolving " + host);
+			byte[] ipbytes = new byte[]{1, 1, 1, 1}; //invalid address
+			try {
+				ip = InetAddress.getByAddress(ipbytes);
+	       		}
+			catch (UnknownHostException e) {
+				Log.d(TAG, "WTF?" + e);
+			}
+		}
+		else
+		{
+				
 		}
 
 		InetAddress[] ips= new InetAddress[] {ip};
 		return ips;
-}
+	}
 }
 	
