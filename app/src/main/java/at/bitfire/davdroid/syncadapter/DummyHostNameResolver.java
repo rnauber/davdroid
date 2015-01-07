@@ -9,7 +9,7 @@ package at.bitfire.davdroid.webdav;
 
 import android.util.Log;
 import at.bitfire.davdroid.Constants;
-import ch.boye.httpclientandroidlib.conn.DnsResolver;
+import org.apache.http.conn.DnsResolver;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 

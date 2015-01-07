@@ -3,22 +3,21 @@ package at.bitfire.davdroid.webdav;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import ch.boye.httpclientandroidlib.HttpHost;
-import ch.boye.httpclientandroidlib.conn.OperatedClientConnection;
-import ch.boye.httpclientandroidlib.conn.scheme.Scheme;
-import ch.boye.httpclientandroidlib.conn.scheme.SchemeRegistry;
-import ch.boye.httpclientandroidlib.conn.scheme.SchemeSocketFactory;
-import ch.boye.httpclientandroidlib.conn.scheme.SocketFactory;
-import ch.boye.httpclientandroidlib.conn.ssl.SSLSocketFactory;
-import ch.boye.httpclientandroidlib.impl.conn.DefaultClientConnectionOperator;
-import ch.boye.httpclientandroidlib.params.HttpParams;
-import ch.boye.httpclientandroidlib.protocol.HttpContext;
+import org.apache.http.HttpHost;
+import org.apache.http.conn.OperatedClientConnection;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.scheme.SchemeSocketFactory;
+import org.apache.http.conn.scheme.SocketFactory;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.impl.conn.DefaultClientConnectionOperator;
+import org.apache.http.params.HttpParams;
+import org.apache.http.protocol.HttpContext;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -38,12 +37,12 @@ import android.annotation.TargetApi;
 import android.net.SSLCertificateSocketFactory;
 import android.os.Build;
 import android.util.Log;
-import ch.boye.httpclientandroidlib.HttpHost;
-import ch.boye.httpclientandroidlib.conn.socket.LayeredConnectionSocketFactory;
-import ch.boye.httpclientandroidlib.conn.ssl.BrowserCompatHostnameVerifier;
-import ch.boye.httpclientandroidlib.protocol.HttpContext;
-import ch.boye.httpclientandroidlib.conn.socket.ConnectionSocketFactory;
-import ch.boye.httpclientandroidlib.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.HttpHost;
+import org.apache.http.conn.socket.LayeredConnectionSocketFactory;
+import org.apache.http.conn.ssl.BrowserCompatHostnameVerifier;
+import org.apache.http.protocol.HttpContext;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 
 
 public class PlainSocksSocketFactory extends PlainConnectionSocketFactory {
@@ -132,7 +131,7 @@ public class PlainSocksSocketFactory extends PlainConnectionSocketFactory {
 			}
 			inputStream.readShort();
 			inputStream.readInt();
-
+		}
 		else
 		{
 			sock.connect(remoteAddress, connectTimeout);
