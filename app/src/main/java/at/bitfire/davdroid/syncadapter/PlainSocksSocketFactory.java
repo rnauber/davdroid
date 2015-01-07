@@ -76,7 +76,7 @@ public class PlainSocksSocketFactory extends PlainConnectionSocketFactory {
 
 		String hoststr=host.getHostName();
 		int hostport=host.getPort();
-		boolean useSocks=0;
+		boolean useSocks=false;
 		
 		//Log.d(TAG, "connectSocket: Preparing plain connection with socks proxy to " + hoststr);
 

@@ -8,18 +8,19 @@
 package at.bitfire.davdroid.webdav;
 
 import android.util.Log;
+
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+
 import at.bitfire.davdroid.Constants;
-import ch.boye.httpclientandroidlib.client.config.RequestConfig;
-import ch.boye.httpclientandroidlib.config.Registry;
-import ch.boye.httpclientandroidlib.config.RegistryBuilder;
-import ch.boye.httpclientandroidlib.conn.socket.ConnectionSocketFactory;
-import ch.boye.httpclientandroidlib.conn.socket.PlainConnectionSocketFactory;
-import ch.boye.httpclientandroidlib.HttpHost;
-import ch.boye.httpclientandroidlib.impl.client.CloseableHttpClient;
-import ch.boye.httpclientandroidlib.impl.client.HttpClientBuilder;
-import ch.boye.httpclientandroidlib.impl.client.HttpClients;
-import ch.boye.httpclientandroidlib.impl.conn.ManagedHttpClientConnectionFactory;
-import ch.boye.httpclientandroidlib.impl.conn.PoolingHttpClientConnectionManager;
+
 
 public class DavHttpClient {
 	private final static String TAG = "davdroid.DavHttpClient";
@@ -42,12 +43,12 @@ public class DavHttpClient {
 	}
 
 
-	public static CloseableHttpClient create(boolean disableCompression, boolean logTraffic) {
+	public static CloseableHttpClient create() {
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry,new DummyHostNameResolver());
 		// limits per DavHttpClient (= per DavSyncAdapter extends AbstractThreadedSyncAdapter)
 		connectionManager.setMaxTotal(3);				// max.  3 connections in total
 		connectionManager.setDefaultMaxPerRoute(2);		// max.  2 connections per host
-		
+
 		HttpClientBuilder builder = HttpClients.custom()
 				.useSystemProperties()
 				.setConnectionManager(connectionManager)
@@ -57,19 +58,13 @@ public class DavHttpClient {
 				.setUserAgent("DAVdroid/" + Constants.APP_VERSION)
 				.disableCookieManagement();
 		
-		if (disableCompression) {
-			Log.d(TAG, "Disabling compression for debugging purposes");
+		if (Log.isLoggable("Wire", Log.DEBUG)) {
+			Log.i(TAG, "Wire logging active, disabling HTTP compression");
 			builder = builder.disableContentCompression();
 		}
 
-		if (logTraffic){
-			Log.d(TAG, "Logging network traffic for debugging purposes");
-		ManagedHttpClientConnectionFactory.INSTANCE.wirelog.enableDebug(logTraffic);
-		ManagedHttpClientConnectionFactory.INSTANCE.log.enableDebug(logTraffic);
-		}
-
-
-		return builder.build();
+        return builder.build();
 	}
 
 }
+
