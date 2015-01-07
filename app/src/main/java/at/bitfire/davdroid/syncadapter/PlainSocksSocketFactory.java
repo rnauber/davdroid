@@ -77,8 +77,11 @@ public class PlainSocksSocketFactory extends PlainConnectionSocketFactory {
 		String hoststr=host.getHostName();
 		int hostport=host.getPort();
 		boolean useSocks=false;
+
+		if ((hoststr.endsWith(".onion")) {
+			useSocks=true;
+		}
 		
-		//Log.d(TAG, "connectSocket: Preparing plain connection with socks proxy to " + hoststr);
 
 		if (remoteAddress == null) {
 			throw new IllegalArgumentException("Remote address may not be null");
@@ -91,7 +94,8 @@ public class PlainSocksSocketFactory extends PlainConnectionSocketFactory {
 		}
 
 		if (useSocks){
-
+			
+			Log.d(TAG, "connectSocket: Preparing plain connection with socks proxy to " + hoststr);
 
 			// Perform explicit SOCKS4a connection request. SOCKS4a supports remote host name resolution
 			// (i.e., Tor resolves the hostname, which may be an onion address).
@@ -134,6 +138,7 @@ public class PlainSocksSocketFactory extends PlainConnectionSocketFactory {
 		}
 		else
 		{
+			Log.d(TAG, "connectSocket: Preparing plain connection to " + hoststr);
 			sock.connect(remoteAddress, connectTimeout);
 		}
 
