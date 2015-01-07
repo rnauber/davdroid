@@ -97,6 +97,7 @@ public class PlainSocksSocketFactory extends PlainConnectionSocketFactory {
 			
 			Log.d(TAG, "connectSocket: Preparing plain connection with socks proxy to " + hoststr);
 
+			// Taken from: https://github.com/guardianproject/NetCipher/blob/master/libnetcipher/src/info/guardianproject/onionkit/proxy/SocksProxyClientConnOperator.java
 			// Perform explicit SOCKS4a connection request. SOCKS4a supports remote host name resolution
 			// (i.e., Tor resolves the hostname, which may be an onion address).
 			// The Android (Apache Harmony) Socket class appears to support only SOCKS4 and throws an
