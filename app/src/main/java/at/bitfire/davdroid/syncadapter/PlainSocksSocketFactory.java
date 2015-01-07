@@ -78,7 +78,7 @@ public class PlainSocksSocketFactory extends PlainConnectionSocketFactory {
 		int hostport=host.getPort();
 		boolean useSocks=false;
 
-		if ((hoststr.endsWith(".onion")) {
+		if (hoststr.endsWith(".onion")) {
 			useSocks=true;
 		}
 		
