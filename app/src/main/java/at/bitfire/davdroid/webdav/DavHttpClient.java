@@ -30,8 +30,8 @@ public class DavHttpClient {
 		
 	static {
 		socketFactoryRegistry =	RegistryBuilder.<ConnectionSocketFactory> create()
-				.register("http", PlainConnectionSocketFactory.getSocketFactory())
-				.register("https", TlsSniSocketFactory.getSocketFactory())
+                               .register("http", PlainSocksSocketFactory.getSocketFactory())
+                               .register("https", TlsSniSocketFactory.getSocketFactory())
 				.build();
 		
 		// use request defaults from AndroidHttpClient
@@ -44,7 +44,7 @@ public class DavHttpClient {
 
 
 	public static CloseableHttpClient create() {
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry,new DummyHostNameResolver());
 		// limits per DavHttpClient (= per DavSyncAdapter extends AbstractThreadedSyncAdapter)
 		connectionManager.setMaxTotal(3);				// max.  3 connections in total
 		connectionManager.setDefaultMaxPerRoute(2);		// max.  2 connections per host
