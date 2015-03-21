@@ -1,10 +1,10 @@
-/*******************************************************************************
- * Copyright (c) 2014 Ricki Hirner (bitfire web engineering).
+/*
+ * Copyright (c) 2013 – 2015 Ricki Hirner (bitfire web engineering).
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
  * which accompanies this distribution, and is available at
  * http://www.gnu.org/licenses/gpl.html
- ******************************************************************************/
+ */
 package at.bitfire.davdroid.resource;
 
 import java.util.Calendar;
@@ -33,7 +33,7 @@ import at.bitfire.davdroid.resource.LocalStorageException;
 public class LocalCalendarTest extends InstrumentationTestCase {
 	
 	private static final String
-		TAG = "davroid.LocalCalendarTest",
+		TAG = "davroid.test",
 		calendarName = "DAVdroid_Test";
 	
 	ContentProviderClient providerClient;
@@ -76,13 +76,13 @@ public class LocalCalendarTest extends InstrumentationTestCase {
 		providerClient = resolver.acquireContentProviderClient(CalendarContract.AUTHORITY);
 		
 		long id;
-		
+
 		@Cleanup Cursor cursor = providerClient.query(Calendars.CONTENT_URI,
-				new String[] { Calendars._ID },
+				new String[]{Calendars._ID},
 				Calendars.ACCOUNT_TYPE + "=? AND " + Calendars.NAME + "=?",
-				new String[] { CalendarContract.ACCOUNT_TYPE_LOCAL, calendarName },
+				new String[]{ CalendarContract.ACCOUNT_TYPE_LOCAL, calendarName },
 				null);
-		if (cursor.moveToNext()) {
+		if (cursor != null && cursor.moveToNext()) {
 			// found local test calendar
 			id = cursor.getLong(0);
 			Log.d(TAG, "Found test calendar with ID " + id);
