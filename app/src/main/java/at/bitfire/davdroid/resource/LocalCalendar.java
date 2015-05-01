@@ -29,10 +29,15 @@ import android.provider.CalendarContract.Reminders;
 import android.provider.ContactsContract;
 import android.util.Log;
 
+import net.fortuna.ical4j.model.Date;
+import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.Dur;
 import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.ParameterList;
 import net.fortuna.ical4j.model.PropertyList;
+import net.fortuna.ical4j.model.TimeZone;
+import net.fortuna.ical4j.model.TimeZoneRegistry;
+import net.fortuna.ical4j.model.TimeZoneRegistryFactory;
 import net.fortuna.ical4j.model.component.VAlarm;
 import net.fortuna.ical4j.model.parameter.Cn;
 import net.fortuna.ical4j.model.parameter.CuType;
@@ -47,7 +52,9 @@ import net.fortuna.ical4j.model.property.ExRule;
 import net.fortuna.ical4j.model.property.Organizer;
 import net.fortuna.ical4j.model.property.RDate;
 import net.fortuna.ical4j.model.property.RRule;
+import net.fortuna.ical4j.model.property.RecurrenceId;
 import net.fortuna.ical4j.model.property.Status;
+import net.fortuna.ical4j.util.TimeZones;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -172,6 +179,7 @@ public class LocalCalendar extends LocalCollection<Event> {
 		super(account, providerClient);
 		this.id = id;
 		this.url = url;
+		sqlFilter = "ORIGINAL_ID IS NULL";
 	}
 
 	
@@ -202,6 +210,25 @@ public class LocalCalendar extends LocalCollection<Event> {
 		}
 	}
 
+	@Override
+	public long[] findUpdated() throws LocalStorageException {
+		// mark (recurring) events with changed/deleted exceptions as dirty
+		String where = entryColumnID() + " IN (SELECT DISTINCT " + Events.ORIGINAL_ID + " FROM events WHERE " +
+			Events.ORIGINAL_ID + " IS NOT NULL AND (" + Events.DIRTY + "=1 OR " + Events.DELETED + "=1))";
+		ContentValues dirty = new ContentValues(1);
+		dirty.put(CalendarContract.Events.DIRTY, 1);
+		try {
+			int rows = providerClient.update(entriesURI(), dirty, where, null);
+			if (rows > 0)
+				Log.d(TAG, rows + " event(s) marked as dirty because of dirty/deleted exceptions");
+		} catch (RemoteException e) {
+			Log.e(TAG, "Couldn't mark events with updated exceptions as dirty", e);
+		}
+
+		// new find and return updated (master) events
+		return super.findUpdated();
+	}
+
 
 	/* create/update/delete */
 	
@@ -210,26 +237,61 @@ public class LocalCalendar extends LocalCollection<Event> {
 	}
 	
 	public void deleteAllExceptRemoteNames(Resource[] remoteResources) {
-		String where;
-		
-		if (remoteResources.length != 0) {
-			List<String> sqlFileNames = new LinkedList<String>();
-			for (Resource res : remoteResources)
-				sqlFileNames.add(DatabaseUtils.sqlEscapeString(res.getName()));
-			where = entryColumnRemoteName() + " NOT IN (" + StringUtils.join(sqlFileNames, ",") + ")";
-		} else
-			where = entryColumnRemoteName() + " IS NOT NULL";
-		
-		Builder builder = ContentProviderOperation.newDelete(entriesURI())
-				.withSelection(entryColumnParentID() + "=? AND (" + where + ")", new String[] { String.valueOf(id) });
-		pendingOperations.add(builder
-				.withYieldAllowed(true)
+		List<String> sqlFileNames = new LinkedList<>();
+		for (Resource res : remoteResources)
+			sqlFileNames.add(DatabaseUtils.sqlEscapeString(res.getName()));
+
+		// delete master events
+		String where = entryColumnParentID() + "=?";
+		where += sqlFileNames.isEmpty() ?
+				" AND " + entryColumnRemoteName() + " IS NOT NULL"  :   // don't retain anything (delete all)
+				" AND " + entryColumnRemoteName() + " NOT IN (" + StringUtils.join(sqlFileNames, ",") + ")";    // retain by remote file name
+		if (sqlFilter != null)
+			where += " AND (" + sqlFilter + ")";
+		pendingOperations.add(ContentProviderOperation.newDelete(entriesURI())
+				.withSelection(where, new String[] { String.valueOf(id) })
 				.build());
+
+		// delete exceptions, too
+		where = entryColumnParentID() + "=?";
+		where += sqlFileNames.isEmpty() ?
+				" AND " + Events.ORIGINAL_SYNC_ID + " IS NOT NULL"  :   // don't retain anything (delete all)
+				" AND " + Events.ORIGINAL_SYNC_ID + " NOT IN (" + StringUtils.join(sqlFileNames, ",") + ")";    // retain by remote file name
+		pendingOperations.add(ContentProviderOperation
+				.newDelete(entriesURI())
+				.withSelection(where, new String[] { String.valueOf(id) })
+				.withYieldAllowed(true)
+				.build()
+		);
+	}
+
+	@Override
+	public void delete(Resource resource) {
+		super.delete(resource);
+
+		// delete all exceptions of this event, too
+		pendingOperations.add(ContentProviderOperation
+				.newDelete(entriesURI())
+				.withSelection(Events.ORIGINAL_ID+"=?", new String[] { Long.toString(resource.getLocalID()) })
+				.build()
+		);
+	}
+
+	@Override
+	public void clearDirty(Resource resource) {
+		super.clearDirty(resource);
+
+		// clear dirty flag of all exceptions of this event
+		pendingOperations.add(ContentProviderOperation
+				.newUpdate(entriesURI())
+				.withValue(Events.DIRTY, 0)
+				.withSelection(Events.ORIGINAL_ID+"=?", new String[] { Long.toString(resource.getLocalID()) })
+				.build()
+		);
 	}
 	
 	
 	/* methods for populating the data object from the content provider */
-	
 
 	@Override
 	public void populate(Resource resource) throws LocalStorageException {
@@ -243,7 +305,8 @@ public class LocalCalendar extends LocalCollection<Event> {
 					/*  8 */ Events.STATUS, Events.ACCESS_LEVEL,
 					/* 10 */ Events.RRULE, Events.RDATE, Events.EXRULE, Events.EXDATE,
 					/* 14 */ Events.HAS_ATTENDEE_DATA, Events.ORGANIZER, Events.SELF_ATTENDEE_STATUS,
-					/* 17 */ entryColumnUID(), Events.DURATION, Events.AVAILABILITY
+					/* 17 */ entryColumnUID(), Events.DURATION, Events.AVAILABILITY,
+					/* 20 */ Events.ORIGINAL_ALL_DAY, Events.ORIGINAL_INSTANCE_TIME
 				}, null, null, null);
 			if (cursor != null && cursor.moveToNext()) {
 				e.setUid(cursor.getString(17));
@@ -311,7 +374,21 @@ public class LocalCalendar extends LocalCollection<Event> {
 				} catch (IllegalArgumentException ex) {
 					Log.w(TAG, "Invalid recurrence rules, ignoring", ex);
 				}
-	
+
+				// recurrence exceptions
+				if (!cursor.isNull(21)) {
+					long originalInstanceTime = cursor.getLong(21);
+					boolean originalAllDay = cursor.getInt(20) != 0;
+					Date originalDate = originalAllDay ?
+							new Date(originalInstanceTime) :
+							new DateTime(originalInstanceTime);
+					if (originalDate instanceof DateTime)
+						((DateTime)originalDate).setUtc(true);
+					e.setRecurrenceId(new RecurrenceId(originalDate));
+				} else
+					// this event may have exceptions
+					populateExceptions(e);
+
 				// status
 				switch (cursor.getInt(8)) {
 				case Events.STATUS_CONFIRMED:
@@ -355,15 +432,35 @@ public class LocalCalendar extends LocalCollection<Event> {
 		}
 	}
 
-	
+	void populateExceptions(Event e) throws RemoteException {
+		Uri exceptionsUri = Events.CONTENT_URI.buildUpon()
+				.appendQueryParameter(ContactsContract.CALLER_IS_SYNCADAPTER, "true")
+				.build();
+		@Cleanup Cursor c = providerClient.query(exceptionsUri, new String[] {
+				/* 0 */ Events._ID, entryColumnRemoteName()
+		}, Events.ORIGINAL_ID + "=?", new String[] { String.valueOf(e.getLocalID()) }, null);
+		while (c != null && c.moveToNext()) {
+			long exceptionId = c.getLong(0);
+			String exceptionRemoteName = c.getString(1);
+			Log.i(TAG, "Found exception ID " + exceptionId + " of original ID " + e.getLocalID());
+			try {
+				Event exception = new Event(exceptionId, exceptionRemoteName, null);
+				populate(exception);
+				e.getExceptions().add(exception);
+			} catch (LocalStorageException ex) {
+				Log.e(TAG, "Couldn't find exception details, ignoring");
+			}
+		}
+	}
+
 	void populateAttendees(Event e) throws RemoteException {
 		Uri attendeesUri = Attendees.CONTENT_URI.buildUpon()
 				.appendQueryParameter(ContactsContract.CALLER_IS_SYNCADAPTER, "true")
 				.build();
-		@Cleanup Cursor c = providerClient.query(attendeesUri, new String[] {
+		@Cleanup Cursor c = providerClient.query(attendeesUri, new String[]{
 				/* 0 */ Attendees.ATTENDEE_EMAIL, Attendees.ATTENDEE_NAME, Attendees.ATTENDEE_TYPE,
 				/* 3 */ Attendees.ATTENDEE_RELATIONSHIP, Attendees.STATUS
-			}, Attendees.EVENT_ID + "=?", new String[] { String.valueOf(e.getLocalID()) }, null);
+		}, Attendees.EVENT_ID + "=?", new String[]{String.valueOf(e.getLocalID())}, null);
 		while (c != null && c.moveToNext()) {
 			try {
 				Attendee attendee = new Attendee(new URI("mailto", c.getString(0), null));
@@ -408,13 +505,13 @@ public class LocalCalendar extends LocalCollection<Event> {
 					break;
 				}
 				
-				e.addAttendee(attendee);
+				e.getAttendees().add(attendee);
 			} catch (URISyntaxException ex) {
 				Log.e(TAG, "Couldn't parse attendee information, ignoring", ex);
 			}
 		}
 	}
-	
+
 	void populateReminders(Event e) throws RemoteException {
 		// reminders
 		Uri remindersUri = Reminders.CONTENT_URI.buildUpon()
@@ -435,10 +532,10 @@ public class LocalCalendar extends LocalCollection<Event> {
 				props.add(Action.DISPLAY);
 				props.add(new Description(e.getSummary()));
 			}
-			e.addAlarm(alarm);
+			e.getAlarms().add(alarm);
 		}
 	}
-	
+
 	
 	/* content builder methods */
 
@@ -448,9 +545,6 @@ public class LocalCalendar extends LocalCollection<Event> {
 
 		builder = builder
 				.withValue(Events.CALENDAR_ID, id)
-				.withValue(entryColumnRemoteName(), event.getName())
-				.withValue(entryColumnETag(), event.getETag())
-				.withValue(entryColumnUID(), event.getUid())
 				.withValue(Events.ALL_DAY, event.isAllDay() ? 1 : 0)
 				.withValue(Events.DTSTART, event.getDtStartInMillis())
 				.withValue(Events.EVENT_TIMEZONE, event.getDtStartTzID())
@@ -458,7 +552,23 @@ public class LocalCalendar extends LocalCollection<Event> {
 				.withValue(Events.GUESTS_CAN_INVITE_OTHERS, 1)
 				.withValue(Events.GUESTS_CAN_MODIFY, 1)
 				.withValue(Events.GUESTS_CAN_SEE_GUESTS, 1);
-		
+
+		RecurrenceId recurrenceId = event.getRecurrenceId();
+		if (recurrenceId == null) {
+			// this event is a "master event" (not an exception)
+			builder = builder
+					.withValue(entryColumnRemoteName(), event.getName())
+					.withValue(entryColumnETag(), event.getETag())
+					.withValue(entryColumnUID(), event.getUid());
+		} else {
+			builder = builder.withValue(Events.ORIGINAL_SYNC_ID, event.getName());
+
+			// ORIGINAL_INSTANCE_TIME and ORIGINAL_ALL_DAY is set in buildExceptions.
+			// It's not possible to use only the RECURRENCE-ID to calculate
+			// ORIGINAL_INSTANCE_TIME and ORIGINAL_ALL_DAY because iCloud sends DATE-TIME
+			// RECURRENCE-IDs even if the original event is an all-day event.
+		}
+
 		boolean recurring = false;
 		if (event.getRrule() != null) {
 			recurring = true;
@@ -520,8 +630,13 @@ public class LocalCalendar extends LocalCollection<Event> {
 	@Override
 	protected void addDataRows(Resource resource, long localID, int backrefIdx) {
 		Event event = (Event)resource;
+		// add exceptions
+		for (Event exception : event.getExceptions())
+			pendingOperations.add(buildException(newDataInsertBuilder(Events.CONTENT_URI, Events.ORIGINAL_ID, localID, backrefIdx), event, exception).build());
+		// add attendees
 		for (Attendee attendee : event.getAttendees())
 			pendingOperations.add(buildAttendee(newDataInsertBuilder(Attendees.CONTENT_URI, Attendees.EVENT_ID, localID, backrefIdx), attendee).build());
+		// add reminders
 		for (VAlarm alarm : event.getAlarms())
 			pendingOperations.add(buildReminder(newDataInsertBuilder(Reminders.CONTENT_URI, Reminders.EVENT_ID, localID, backrefIdx), alarm).build());
 	}
@@ -529,14 +644,49 @@ public class LocalCalendar extends LocalCollection<Event> {
 	@Override
 	protected void removeDataRows(Resource resource) {
 		Event event = (Event)resource;
+		// delete exceptions
+		pendingOperations.add(ContentProviderOperation.newDelete(entriesURI())
+				.withSelection(Events.ORIGINAL_ID + "=?",
+				new String[] { String.valueOf(event.getLocalID()) }).build());
+		// delete attendees
 		pendingOperations.add(ContentProviderOperation.newDelete(syncAdapterURI(Attendees.CONTENT_URI))
 				.withSelection(Attendees.EVENT_ID + "=?",
 				new String[] { String.valueOf(event.getLocalID()) }).build());
+		// delete reminders
 		pendingOperations.add(ContentProviderOperation.newDelete(syncAdapterURI(Reminders.CONTENT_URI))
 				.withSelection(Reminders.EVENT_ID + "=?",
 				new String[] { String.valueOf(event.getLocalID()) }).build());
 	}
 
+
+	protected Builder buildException(Builder builder, Event master, Event exception) {
+		buildEntry(builder, exception);
+		builder.withValue(Events.ORIGINAL_SYNC_ID, exception.getName());
+
+		// Some servers (iCloud, for instance) return RECURRENCE-ID with DATE-TIME even if
+		// the original event is an all-day event. Workaround: determine value of ORIGINAL_ALL_DAY
+		// by original event type (all-day or not) and not by whether RECURRENCE-ID is DATE or DATE-TIME.
+
+		RecurrenceId recurrenceId = exception.getRecurrenceId();
+		Date date = recurrenceId.getDate();
+
+		boolean originalAllDay = master.isAllDay();
+		if (originalAllDay && date instanceof DateTime) {
+			String value = recurrenceId.getValue();
+			if (value.matches("^\\d{8}T\\d{6}$"))
+				try {
+					// no "Z" at the end indicates "local" time
+					// so this is a "local" time, but it should be a ical4j Date without time
+					date = new Date(value.substring(0, 8));
+				} catch (ParseException e) {
+					Log.e(TAG, "Couldn't parse DATE part of DATE-TIME RECURRENCE-ID", e);
+				}
+		}
+
+		builder.withValue(Events.ORIGINAL_INSTANCE_TIME, date.getTime());
+		builder.withValue(Events.ORIGINAL_ALL_DAY, originalAllDay ? 1 : 0);
+		return builder;
+	}
 	
 	@SuppressLint("InlinedApi")
 	protected Builder buildAttendee(Builder builder, Attendee attendee) {
