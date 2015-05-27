@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 – 2015 Ricki Hirner (bitfire web engineering).
+ * Copyright © 2013 – 2015 Ricki Hirner (bitfire web engineering).
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
  * which accompanies this distribution, and is available at
@@ -27,7 +27,6 @@ import at.bitfire.davdroid.resource.RemoteCollection;
 public class ContactsSyncAdapterService extends Service {
 	private static ContactsSyncAdapter syncAdapter;
 
-	
 	@Override
 	public void onCreate() {
 		if (syncAdapter == null)
@@ -47,9 +46,8 @@ public class ContactsSyncAdapterService extends Service {
 	
 
 	private static class ContactsSyncAdapter extends DavSyncAdapter {
-		private final static String TAG = "davdroid.ContactsSyncAdapter";
+		private final static String TAG = "davdroid.ContactsSync";
 
-		
 		private ContactsSyncAdapter(Context context) {
 			super(context);
 		}

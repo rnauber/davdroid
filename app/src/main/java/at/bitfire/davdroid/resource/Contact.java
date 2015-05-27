@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 – 2015 Ricki Hirner (bitfire web engineering).
+ * Copyright © 2013 – 2015 Ricki Hirner (bitfire web engineering).
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
  * which accompanies this distribution, and is available at
@@ -83,14 +83,14 @@ public class Contact extends Resource {
 		PROPERTY_PHONETIC_LAST_NAME = "X-PHONETIC-LAST-NAME",
 		PROPERTY_SIP = "X-SIP";
 		
-	public final static EmailType EMAIL_TYPE_MOBILE = EmailType.get("X-MOBILE");
+	public final static EmailType EMAIL_TYPE_MOBILE = EmailType.get("x-mobile");
 
 	public final static TelephoneType
-		PHONE_TYPE_CALLBACK = TelephoneType.get("X-CALLBACK"),
-		PHONE_TYPE_COMPANY_MAIN = TelephoneType.get("X-COMPANY_MAIN"),
-		PHONE_TYPE_RADIO = TelephoneType.get("X-RADIO"),
-		PHONE_TYPE_ASSISTANT = TelephoneType.get("X-ASSISTANT"),
-		PHONE_TYPE_MMS = TelephoneType.get("X-MMS");
+		PHONE_TYPE_CALLBACK = TelephoneType.get("x-callback"),
+		PHONE_TYPE_COMPANY_MAIN = TelephoneType.get("x-company_main"),
+		PHONE_TYPE_RADIO = TelephoneType.get("x-radio"),
+		PHONE_TYPE_ASSISTANT = TelephoneType.get("X-assistant"),
+		PHONE_TYPE_MMS = TelephoneType.get("x-mms");
 	public final static RelatedType
 		RELATED_TYPE_BROTHER = RelatedType.get("brother"),
 		RELATED_TYPE_FATHER = RelatedType.get("father"),
@@ -345,7 +345,7 @@ public class Contact extends Resource {
 		}
 		if (vcard == null)
 			vcard = new VCard();
-		
+
 		if (uid != null)
 			vcard.setUid(new Uid(uid));
 		else
@@ -437,9 +437,10 @@ public class Contact extends Resource {
 		if (photo != null)
 			vcard.addPhoto(new Photo(photo, ImageType.JPEG));
 
+		// REL
 		for (Related related : relations)
 			vcard.addRelated(related);
-		
+
 		// PRODID, REV
 		vcard.setProductId("DAVdroid/" + Constants.APP_VERSION + " (ez-vcard/" + Ezvcard.VERSION + ")");
 		vcard.setRevision(Revision.now());
